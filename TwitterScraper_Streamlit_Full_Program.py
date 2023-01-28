@@ -1,6 +1,7 @@
 import pandas as pd
 import snscrape.modules.twitter as sntwitter
 import json
+from datetime import datetime
 # import pymongo
 # from pymongo import MongoClient
 import streamlit as st
@@ -21,8 +22,10 @@ likecount, language and source of the tweets
 #Inputs the number of tweets and username from the user
 limit = st.number_input('Enter the limit:' )
 username = st.text_input('Enter the username without @ symbol:')
+start_date = st.date_input("Enter the start date YYYY/MM/DD: ")
+end_date = st.date_input("Enter the end date YYYY/MM/DD: ")
 lst1 = []
-for tweet in sntwitter.TwitterSearchScraper(username).get_items():
+for tweet in sntwitter.TwitterSearchScraper('username, since:start_date until:end_date').get_items():
     if len(lst1) == limit:
         break
     else:
