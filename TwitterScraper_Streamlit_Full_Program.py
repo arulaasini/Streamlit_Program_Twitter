@@ -1,46 +1,39 @@
+#Importing Relevant libraries
 import pandas as pd
 import snscrape.modules.twitter as sntwitter
 import json
-from datetime import datetime
-# import pymongo
-# from pymongo import MongoClient
 import streamlit as st
+import matplotlib.pyplot as plt
+import plotly.express as px
 
-st.title("""
-Scraping Data from Twitter Using Python
-""")
-st.write("""
-This app scrapes the data from the Twitter
-""")
-st.write ("---")
-st.write('**Description of Dataset**')
+st.title("""***SCRAPING DATA FROM TWITTER USING PYTHON***""")
+st.write("""This app scrapes the data from the twitter""")
+st.write('***Description of the dataset:***')
 st.write("""
 The dataset includes id, date, url, username, content, replycount, retweetcount,
 likecount, language and source of the tweets
 """)
 
-#Inputs the number of tweets and username from the user
-limit = st.number_input('Enter the limit:' )
-username = st.text_input('Enter the username without @ symbol:')
-start_date = st.date_input("Enter the start date YYYY/MM/DD: ")
-end_date = st.date_input("Enter the end date YYYY/MM/DD: ")
+#scraping the data from the twitter
+limit = st.number_input("Enter the number of tweets: ")
+username = st.text_input("Enter the username without @ symbol (ex: #python or python): ")
 lst1 = []
-for tweet in sntwitter.TwitterSearchScraper('username, since:start_date until:end_date').get_items():
+for tweet in sntwitter.TwitterSearchScraper('username').get_items():
     if len(lst1) == limit:
         break
     else:
-        lst1.append([tweet.date, tweet.url, tweet.content, tweet.id, tweet.user.username, tweet.replyCount,
-                         tweet.retweetCount, tweet.likeCount, tweet.lang, tweet.source])
-
-#loading into pandas dataframe
-df = pd.DataFrame(lst1, columns=["Date", "url", "content", "id", "username", "replyCount", "retweetCount", "likeCount",
+        lst1.append(
+            [tweet.date, tweet.url, tweet.content, tweet.id, tweet.user.username, tweet.replyCount, tweet.retweetCount,
+             tweet.likeCount, tweet.lang, tweet.source])
+    # Pandas dataframe
+df = pd.DataFrame(lst1,
+                      columns=["Date", "url", "content", "id", "username", "replyCount", "retweetCount", "likeCount",
                                "language", "source"])
 st.write(df)
-
-#type of files either json or csv
+#either json or csv
 fileselect = st.sidebar.selectbox(
-    label = "Select the type of the file you want",
-    options = ["CSV", "json"])
+label = "Select the type of the file",
+options = ["CSV", "json"])
 
 if fileselect == "CSV":
     df.to_csv('df_csv.csv', sep=',')
@@ -50,9 +43,49 @@ if fileselect == "CSV":
 if fileselect == "json":
     dfj = df.to_json(orient='records')
     st.write(dfj)
-    from pathlib import Path
-    st.download_button(
-    "Download json",
-    data=Path("dfj.json").read_text(),
-    file_name="dfj.json",
-    mime="application/json",)
+from pathlib import Path
+st.download_button(
+"Download json",
+data=Path("dfj.json").read_text(),
+file_name="dfj.json",
+mime="application/json")
+#visualization
+chart_select = st.sidebar.selectbox(
+    label = "Chart Type",
+    options = ['Scatterplots', 'Lineplots', 'Histogram', 'Boxplot'])
+numeric_columns = list(df.select_dtypes(['int']).columns)
+if chart_select == 'Scatterplots':
+    st.sidebar.subheader('Scatterplot Settings')
+try:
+    x_values = st.sidebar.selectbox('X axis', options = numeric_columns)
+    y_values = st.sidebar.selectbox('Y axis', options = numeric_columns)
+    plot = px.scatter(data_frame=df, x = x_values, y = y_values)
+    st.write(plot)
+except Exception as e:
+    print(e)
+if chart_select == 'Histogram':
+    st.sidebar.subheader('Histogram Settings')
+try:
+    x_values = st.sidebar.selectbox('X axis', options=numeric_columns)
+    plot = px.histogram(data_frame=df, x = x_values)
+    st.write(plot)
+except Exception as e:
+    print(e)
+if chart_select == 'Lineplots':
+    st.sidebar.subheader('Lineplot Settings')
+try:
+    x_values = st.sidebar.selectbox('X axis', options=numeric_columns)
+    y_values = st.sidebar.selectbox('Y axis', options=numeric_columns)
+    plot = px.line(data_frame=df, x=x_values, y=y_values)
+    st.write(plot)
+except Exception as e:
+    print(e)
+if chart_select == 'Boxplot':
+    st.sidebar.subheader('Boxplot Settings')
+try:
+   x_values = st.sidebar.selectbox('X axis', options=numeric_columns)
+   y_values = st.sidebar.selectbox('Y axis', options=numeric_columns)
+   plot = px.box(data_frame=df, x=x_values, y=y_values)
+   st.write(plot)
+except Exception as e:
+   print(e)
