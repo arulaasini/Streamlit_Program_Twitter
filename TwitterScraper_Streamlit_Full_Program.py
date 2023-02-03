@@ -1,9 +1,7 @@
 #Importing Relevant libraries
 import pandas as pd
 import snscrape.modules.twitter as sntwitter
-import json
 import streamlit as st
-import matplotlib.pyplot as plt
 import plotly.express as px
 
 st.title("""***SCRAPING DATA FROM TWITTER USING PYTHON***""")
@@ -17,6 +15,8 @@ likecount, language and source of the tweets
 #scraping the data from the twitter
 limit = st.number_input("Enter the number of tweets: ")
 username = st.text_input("Enter the username without @ symbol (ex: #python or python): ")
+# start_date = st.date_input("start date[yyyy/mm/dd]")
+# end_date = st.date_input("end date[yyyy/mm/dd]")
 lst1 = []
 for tweet in sntwitter.TwitterSearchScraper('username').get_items():
     if len(lst1) == limit:
@@ -52,17 +52,8 @@ mime="application/json")
 #visualization
 chart_select = st.sidebar.selectbox(
     label = "Chart Type",
-    options = ['Scatterplots', 'Lineplots', 'Histogram', 'Boxplot'])
+    options = ['Histogram'])
 numeric_columns = list(df.select_dtypes(['int']).columns)
-if chart_select == 'Scatterplots':
-    st.sidebar.subheader('Scatterplot Settings')
-try:
-    x_values = st.sidebar.selectbox('X axis', options = numeric_columns)
-    y_values = st.sidebar.selectbox('Y axis', options = numeric_columns)
-    plot = px.scatter(data_frame=df, x = x_values, y = y_values)
-    st.write(plot)
-except Exception as e:
-    print(e)
 if chart_select == 'Histogram':
     st.sidebar.subheader('Histogram Settings')
 try:
@@ -71,21 +62,3 @@ try:
     st.write(plot)
 except Exception as e:
     print(e)
-if chart_select == 'Lineplots':
-    st.sidebar.subheader('Lineplot Settings')
-try:
-    x_values = st.sidebar.selectbox('X axis', options=numeric_columns)
-    y_values = st.sidebar.selectbox('Y axis', options=numeric_columns)
-    plot = px.line(data_frame=df, x=x_values, y=y_values)
-    st.write(plot)
-except Exception as e:
-    print(e)
-if chart_select == 'Boxplot':
-    st.sidebar.subheader('Boxplot Settings')
-try:
-   x_values = st.sidebar.selectbox('X axis', options=numeric_columns)
-   y_values = st.sidebar.selectbox('Y axis', options=numeric_columns)
-   plot = px.box(data_frame=df, x=x_values, y=y_values)
-   st.write(plot)
-except Exception as e:
-   print(e)
